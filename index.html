@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      let indexedDB =
+        window.indexedDB ||
+        window.mozIndexedDB ||
+        window.webkitIndexedDB ||
+        window.msIndexedDB;
+      if (!indexedDB) {
+        console.log("浏览器不支持indexedDB");
+      }
+      // 打开我们的数据库,使用open方法
+      let request = indexedDB.open("MyTestDatabase");
+      // 错误处理，onerror函数
+      request.onerror = function (event) {
+        console.log("error", event);
+      };
+
+      // 接上面的代码
+      request.onupgradeneeded = function (event) {
+        var db = event.target.result;
+        // 为该数据库创建一个对象仓库，创建一个名为“userInfo”的仓库，并指定id作为键路径(keyPath)
+        var objectStore = db.createObjectStore("userInfo", { keyPath: "id" });
+        // 建立一个索引来通过姓名来搜索客户。名字可能会重复，所以我们不能使用 unique 索引
+        objectStore.createIndex("name", "name", { unique: false });
+        // 使用邮箱建立索引，我们向确保客户的邮箱不会重复，所以我们使用 unique 索引
+        objectStore.createIndex("email", "email", { unique: true });
+      };
+
+      let arr = [];
+      for (let i = 0; i < 100; i++) {
+        arr.push({
+          id: i,
+          name: "张" + i,
+          email: i + "@qq.com",
+        });
+      }
+
+      request.onsuccess = function (event) {
+        db = event.target.result;
+        var transaction = db.transaction(["userInfo"], "readwrite");
+        var objectStore = transaction.objectStore("userInfo");
+        for (let i of arr) {
+          objectStore.add(i);
+        }
+        let men1 = objectStore.get(2);
+        men1.onsuccess = function (e) {
+          var data = e.target.result;
+          console.log(data);
+        };
+      };
+    </script>
+  </body>
+</html>
