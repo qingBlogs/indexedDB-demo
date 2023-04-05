@@ -16,21 +16,24 @@
       if (!indexedDB) {
         console.log("浏览器不支持indexedDB");
       }
-      // 打开我们的数据库,使用open方法
+      // 打开我们的数据库,使用open方法 (Open our database, use the open method.)
       let request = indexedDB.open("MyTestDatabase");
-      // 错误处理，onerror函数
+      // 错误处理，onerror函数(Error handling, onerror function.)
       request.onerror = function (event) {
         console.log("error", event);
       };
 
-      // 接上面的代码
+      // 接上面的代码(Attached code)
       request.onupgradeneeded = function (event) {
         var db = event.target.result;
         // 为该数据库创建一个对象仓库，创建一个名为“userInfo”的仓库，并指定id作为键路径(keyPath)
+        // Create an object store for the database and name it "userInfo", specifying "id" as the key path.
         var objectStore = db.createObjectStore("userInfo", { keyPath: "id" });
         // 建立一个索引来通过姓名来搜索客户。名字可能会重复，所以我们不能使用 unique 索引
+        // Create an index to search customers by name. The name may be duplicated, so we cannot use a unique index.
         objectStore.createIndex("name", "name", { unique: false });
         // 使用邮箱建立索引，我们向确保客户的邮箱不会重复，所以我们使用 unique 索引
+        // Create an index using the email address, and ensure that the email addresses of customers are not duplicated by using a unique index.
         objectStore.createIndex("email", "email", { unique: true });
       };
 
